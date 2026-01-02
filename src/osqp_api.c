@@ -1320,6 +1320,7 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   OSQPWorkspace *work;
 
   c_eprint("osqp_update_data_mat\n");
+  return 1;
 
   // Check if workspace has been initialized
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
