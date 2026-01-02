@@ -340,6 +340,9 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
                    OSQPInt              n,
                    const OSQPSettings*  settings) {
 
+  printf("osqp_setup\n");
+  fflush(stdout);
+
   OSQPInt exitflag;
 
   OSQPSolver*    solver;
@@ -635,6 +638,9 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 
 
 OSQPInt osqp_solve(OSQPSolver *solver) {
+
+  printf("osqp_solve\n");
+  fflush(stdout);
 
   OSQPInt exitflag;
   OSQPInt iter, max_iter;
@@ -1319,8 +1325,8 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   OSQPInt nnzP, nnzA; // Number of nonzeros in P and A
   OSQPWorkspace *work;
 
-  // printf("osqp_update_data_mat\n");
-  // fflush(stdout);
+  printf("osqp_update_data_mat\n");
+  fflush(stdout);
 
   // Check if workspace has been initialized
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
