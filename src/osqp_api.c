@@ -1337,6 +1337,9 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   nnzP = OSQPMatrix_get_nz(work->data->P);
   nnzA = OSQPMatrix_get_nz(work->data->A);
 
+  c_eprint("osqp_update_data_mat\n");
+  return 1;
+
   // Check if the number of elements to update is valid
   if (P_new_n > nnzP || P_new_n < 0) {
     c_eprint("new number of elements (%i) out of bounds for P (%i max)",
@@ -1372,6 +1375,9 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
     A_new_n = nnzA;
   }
 
+  c_eprint("osqp_update_data_mat\n");
+  return 1;
+
   if (solver->settings->scaling) unscale_data(solver);
 
   if (Px_new){
@@ -1397,6 +1403,9 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
                   work->data->P, Px_new_idx, P_new_n,
                   work->data->A, Ax_new_idx, A_new_n);
   }
+
+  c_eprint("osqp_update_data_mat\n");
+  return 1;
 
 
   // Reset solver information
