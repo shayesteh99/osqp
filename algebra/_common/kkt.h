@@ -35,6 +35,9 @@ extern "C" {
  *KKT
  * @return            return status flag
  */
+
+ extern OSQPInt* KKT_col_touched;
+
  OSQPCscMatrix* form_KKT(OSQPCscMatrix* P,
                          OSQPCscMatrix* A,
                          OSQPInt        format,

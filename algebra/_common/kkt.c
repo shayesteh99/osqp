@@ -1,5 +1,6 @@
 #include "kkt.h"
 
+static OSQPInt* KKT_col_touched = OSQP_NULL;
 
 //add an offset to every term in the upper nxn block.
 //assumes triu CSC or CSR format, with fully populated diagonal.
@@ -338,6 +339,13 @@ OSQPCscMatrix* form_KKT(OSQPCscMatrix* P,
   //NB: rhtoKKT is not needed to do this
   _kkt_shifts_param2(KKT,param2,param2_sc,n,m,format);
 
+  // Allocate column-touch tracking for ALL KKT columns (n + m)
+  OSQPInt KKT_dim = KKT->n;  // total KKT dimension
+  KKT_col_touched = (OSQPInt*)c_malloc(KKT_dim * sizeof(OSQPInt));
+  for(OSQPInt i = 0; i < KKT_dim; i++) {
+      KKT_col_touched[i] = 0;
+  }
+
   return KKT;
 }
 
@@ -361,6 +369,20 @@ void update_KKT_P(OSQPCscMatrix* KKT,
   //elements are to be replaced (and that P_new_n = nnz(P))
   doall  = Px_new_idx == OSQP_NULL ? 1 : 0;
   offset = format == 0 ? 1 : 0;
+
+  // Mark columns directly if indices are provided
+  if (Px_new_idx != OSQP_NULL) {
+      for (OSQPInt t = 0; t < P_new_n; t++) {
+          OSQPInt col = Px_new_idx[t];  // assume Python will pass column indices
+          if (col < KKT->n) {
+              KKT_col_touched[col] = 1;
+          }
+      }
+  } else {
+      for (OSQPInt col = 0; col < KKT->n; col++) {
+          KKT_col_touched[col] = 1;
+      }
+  }
 
   for (j = 0; j < P_new_n; j++) {
     Pidx = doall ? j : Px_new_idx[j];
@@ -390,6 +412,21 @@ void update_KKT_A(OSQPCscMatrix* KKT,
   //if Ax_new_idx is null, we assume that all
   //elements are to be replaced (and that A_new_n = nnz(A))
   doall  = Ax_new_idx == OSQP_NULL ? 1 : 0;
+
+  // Mark columns directly if indices are provided
+  if (Ax_new_idx != OSQP_NULL) {
+    for (OSQPInt t = 0; t < A_new_n; t++) {
+        OSQPInt col = Ax_new_idx[t];
+        if (col < KKT->n) {
+            KKT_col_touched[col] = 1;
+        }
+    }
+  } else {
+      for (OSQPInt col = 0; col < KKT->n; col++) {
+          KKT_col_touched[col] = 1;
+      }
+  }
+
 
   // Update elements of KKT using A
   for (j = 0; j < A_new_n; j++) {

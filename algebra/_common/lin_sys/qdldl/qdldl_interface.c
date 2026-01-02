@@ -482,9 +482,22 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
     update_KKT_A(s->KKT, A->csc, Ax_new_idx, A_new_n, s->AtoKKT);
 
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
-    pos_D_count = QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
-        s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
-        s->etree, s->bwork, s->iwork, s->fwork);
+
+    for(OSQPInt col = 0; col < s->KKT->n; col++) {
+        if (KKT_col_touched[col]) {
+            if (QDLDL_factor_partial(s, col) < 0) {
+                return 1;  // early abort if partial factor fails
+            }
+        }
+    }
+
+    for(OSQPInt i = 0; i < s->KKT->n; i++) {
+        KKT_col_touched[i] = 0;
+    }
+    
+    // pos_D_count = QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+    //     s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
+    //     s->etree, s->bwork, s->iwork, s->fwork);
     osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
 
     //number of positive elements in D should match the

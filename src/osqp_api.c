@@ -1409,6 +1409,19 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
 }
 
 
+OSQPInt osqp_update_data_mat_partial(
+    OSQPSolver *solver,
+    const OSQPMatrix *P, const OSQPInt *Px_new_idx, OSQPInt P_new_n,
+    const OSQPMatrix *A, const OSQPInt *Ax_new_idx, OSQPInt A_new_n,
+    const OSQPInt *cols_changed, OSQPInt n_changed
+) {
+    update_KKT_P(solver->kkt, P->csc, Px_new_idx, P_new_n, solver->linsys->PtoKKT, solver->settings->sigma, 0);
+    update_KKT_A(solver->kkt, A->csc, Ax_new_idx, A_new_n, solver->linsys->AtoKKT);
+    QDLDL_factor_partial(..., cols_changed, n_changed);
+    return 0;
+}
+
+
 OSQPInt osqp_update_rho(OSQPSolver* solver,
                         OSQPFloat     rho_new) {
 
