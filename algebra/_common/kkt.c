@@ -1,6 +1,6 @@
 #include "kkt.h"
 
-static OSQPInt* KKT_col_touched = OSQP_NULL;
+OSQPInt* KKT_col_touched = OSQP_NULL;
 
 //add an offset to every term in the upper nxn block.
 //assumes triu CSC or CSR format, with fully populated diagonal.
