@@ -473,7 +473,7 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
                                             const OSQPInt*    Ax_new_idx,
                                             OSQPInt           A_new_n) {
 
-    OSQPInt pos_D_count;
+    OSQPInt pos_D_count = 0;
 
     // Update KKT matrix with new P
     update_KKT_P(s->KKT, P->csc, Px_new_idx, P_new_n, s->PtoKKT, s->sigma, 0);
@@ -485,16 +485,23 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
 
     for(OSQPInt col = 0; col < s->KKT->n; col++) {
         if (KKT_col_touched[col]) {
-            if (QDLDL_factor_partial(s, col) < 0) {
+            if (QDLDL_factor_partial(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+        s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
+        s->etree, s->bwork, s->iwork, s->fwork, col); < 0) {
                 return 1;  // early abort if partial factor fails
             }
         }
+        // Count positive diagonal
+        if (s->D[col] > 0.0) {
+            pos_D_count++;
+        }
+        
     }
 
     for(OSQPInt i = 0; i < s->KKT->n; i++) {
         KKT_col_touched[i] = 0;
     }
-    
+
     // pos_D_count = QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
     //     s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
     //     s->etree, s->bwork, s->iwork, s->fwork);
