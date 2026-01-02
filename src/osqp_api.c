@@ -1365,6 +1365,8 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
     return 2;
   }
 
+
+  printf("osqp_update_data_mat\n");fflush(stdout);
     // Handle legacy behavior that allowed passing 0 as the length when updating all values
   if(A_new_n == 0) {
     A_new_n = nnzA;
