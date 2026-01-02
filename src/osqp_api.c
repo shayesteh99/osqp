@@ -1337,7 +1337,7 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   nnzP = OSQPMatrix_get_nz(work->data->P);
   nnzA = OSQPMatrix_get_nz(work->data->A);
 
-  printf("osqp_update_data_mat\n");
+  printf("osqp_update_data_mat\n");;
   fflush(stdout);
 
   // Check if the number of elements to update is valid
