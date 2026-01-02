@@ -1319,8 +1319,8 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   OSQPInt nnzP, nnzA; // Number of nonzeros in P and A
   OSQPWorkspace *work;
 
-  c_eprint("osqp_update_data_mat\n");
-  return 1;
+  printf("osqp_update_data_mat\n");
+  fflush(stdout);
 
   // Check if workspace has been initialized
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1337,8 +1337,8 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   nnzP = OSQPMatrix_get_nz(work->data->P);
   nnzA = OSQPMatrix_get_nz(work->data->A);
 
-  c_eprint("osqp_update_data_mat\n");
-  return 1;
+  printf("osqp_update_data_mat\n");
+  fflush(stdout);
 
   // Check if the number of elements to update is valid
   if (P_new_n > nnzP || P_new_n < 0) {
@@ -1375,8 +1375,8 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
     A_new_n = nnzA;
   }
 
-  c_eprint("osqp_update_data_mat\n");
-  return 1;
+  printf("osqp_update_data_mat\n");
+  fflush(stdout);
 
   if (solver->settings->scaling) unscale_data(solver);
 
