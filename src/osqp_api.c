@@ -1472,7 +1472,7 @@ OSQPInt osqp_update_data_mat_partial(OSQPSolver*      solver,
       // -------------------------------
       // Partial KKT factorization
       // -------------------------------
-      OSQPBool *KKT_col_touched = work->linsys_solver->KKT_col_touched;
+      OSQPInt *KKT_col_touched = work->linsys_solver->KKT_col_touched;
 
       // Mark columns touched by P
       if (Px_new_idx) {
