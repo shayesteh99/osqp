@@ -1319,8 +1319,8 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   OSQPInt nnzP, nnzA; // Number of nonzeros in P and A
   OSQPWorkspace *work;
 
-  printf("osqp_update_data_mat\n");
-  fflush(stdout);
+  // printf("osqp_update_data_mat\n");
+  // fflush(stdout);
 
   // Check if workspace has been initialized
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
