@@ -483,7 +483,7 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
 
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
 
-    printf("update_linsys_solver_matrices_qdldl\n");
+    printf("update_linsys_solver_matrices_qdldl\n");fflush(stdout); exit(1);
 
     for(OSQPInt col = 0; col < s->KKT->n; col++) {
         if (KKT_col_touched[col]) {
