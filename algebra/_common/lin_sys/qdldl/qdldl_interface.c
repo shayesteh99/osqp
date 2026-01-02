@@ -487,7 +487,7 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
         if (KKT_col_touched[col]) {
             if (QDLDL_factor_partial(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
-        s->etree, s->bwork, s->iwork, s->fwork, col); < 0) {
+        s->etree, s->bwork, s->iwork, s->fwork, col) < 0) {
                 return 1;  // early abort if partial factor fails
             }
         }
@@ -495,7 +495,7 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
         if (s->D[col] > 0.0) {
             pos_D_count++;
         }
-        
+
     }
 
     for(OSQPInt i = 0; i < s->KKT->n; i++) {
