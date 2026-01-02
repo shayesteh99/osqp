@@ -1409,17 +1409,119 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
 }
 
 
-OSQPInt osqp_update_data_mat_partial(
-    OSQPSolver *solver,
-    const OSQPMatrix *P, const OSQPInt *Px_new_idx, OSQPInt P_new_n,
-    const OSQPMatrix *A, const OSQPInt *Ax_new_idx, OSQPInt A_new_n,
-    const OSQPInt *cols_changed, OSQPInt n_changed
-) {
-    update_KKT_P(solver->kkt, P->csc, Px_new_idx, P_new_n, solver->linsys->PtoKKT, solver->settings->sigma, 0);
-    update_KKT_A(solver->kkt, A->csc, Ax_new_idx, A_new_n, solver->linsys->AtoKKT);
-    QDLDL_factor_partial(..., cols_changed, n_changed);
-    return 0;
+OSQPInt osqp_update_data_mat_partial(OSQPSolver*      solver,
+                                     const OSQPFloat* Px_new,
+                                     const OSQPInt*   Px_new_idx,
+                                     OSQPInt          P_new_n,
+                                     const OSQPFloat* Ax_new,
+                                     const OSQPInt*   Ax_new_idx,
+                                     OSQPInt          A_new_n) {
+
+    OSQPInt exitflag = 0;       // Exit flag
+    OSQPInt nnzP, nnzA;         // Number of nonzeros in P and A
+    OSQPWorkspace *work;
+    OSQPInt col;
+
+    // Check if workspace has been initialized
+    if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+      work = solver->work;
+
+  #ifdef OSQP_ENABLE_PROFILING
+      if (work->clear_update_time == 1) {
+          work->clear_update_time = 0;
+          solver->info->update_time = 0.0;
+      }
+      osqp_tic(work->timer); // Start timer
+  #endif /* OSQP_ENABLE_PROFILING */
+
+      nnzP = OSQPMatrix_get_nz(work->data->P);
+      nnzA = OSQPMatrix_get_nz(work->data->A);
+
+      // Check bounds for P updates
+      if (P_new_n > nnzP || P_new_n < 0) {
+          c_eprint("new number of elements (%i) out of bounds for P (%i max)",
+                   (int)P_new_n, (int)nnzP);
+          return 1;
+      }
+      if(Px_new_idx == OSQP_NULL && P_new_n != 0 && P_new_n != nnzP){
+          c_eprint("index vector is required for partial updates of P");
+          return 1;
+      }
+      if(P_new_n == 0) P_new_n = nnzP; // legacy behavior
+
+      // Check bounds for A updates
+      if (A_new_n > nnzA || A_new_n < 0) {
+          c_eprint("new number of elements (%i) out of bounds for A (%i max)",
+                   (int)A_new_n, (int)nnzA);
+          return 2;
+      }
+      if(Ax_new_idx == OSQP_NULL && A_new_n != 0 && A_new_n != nnzA){
+          c_eprint("index vector is required for partial updates of A");
+          return 2;
+      }
+      if(A_new_n == 0) A_new_n = nnzA; // legacy behavior
+
+      if (solver->settings->scaling) unscale_data(solver);
+
+      // Update values in P and A
+      if (Px_new) OSQPMatrix_update_values(work->data->P, Px_new, Px_new_idx, P_new_n);
+      if (Ax_new) OSQPMatrix_update_values(work->data->A, Ax_new, Ax_new_idx, A_new_n);
+
+      if (solver->settings->scaling) scale_data(solver);
+
+      // -------------------------------
+      // Partial KKT factorization
+      // -------------------------------
+      OSQPBool *KKT_col_touched = work->linsys_solver->KKT_col_touched;
+
+      // Mark columns touched by P
+      if (Px_new_idx) {
+          for (OSQPInt i = 0; i < P_new_n; i++) KKT_col_touched[Px_new_idx[i]] = 1;
+      } else {
+          for (OSQPInt i = 0; i < work->data->P->n; i++) KKT_col_touched[i] = 1;
+      }
+
+      // Mark columns touched by A (shifted by n_P)
+      OSQPInt n_P = work->data->P->n;
+      if (Ax_new_idx) {
+          for (OSQPInt i = 0; i < A_new_n; i++) KKT_col_touched[n_P + Ax_new_idx[i]] = 1;
+      } else {
+          for (OSQPInt i = 0; i < work->data->A->n; i++) KKT_col_touched[n_P + i] = 1;
+      }
+
+      // Call QDLDL_factor_partial for only touched columns
+      for (col = 0; col < work->linsys_solver->KKT->n; col++) {
+          if (KKT_col_touched[col]) {
+              exitflag = QDLDL_factor_partial(
+                  work->linsys_solver->KKT->n, work->linsys_solver->KKT->p,
+                  work->linsys_solver->KKT->i, work->linsys_solver->KKT->x,
+                  work->linsys_solver->Lp, work->linsys_solver->Li, work->linsys_solver->Lx,
+                  work->linsys_solver->D, work->linsys_solver->Dinv, work->linsys_solver->Lnz,
+                  work->linsys_solver->etree, work->linsys_solver->bwork,
+                  work->linsys_solver->iwork, work->linsys_solver->fwork,
+                  col
+              );
+
+              if (exitflag < 0) {
+                  c_eprint("Partial factorization failed at column %d", (int)col);
+                  return 1;
+              }
+          }
+      }
+
+      // Reset touched flags
+      for (col = 0; col < work->linsys_solver->KKT->n; col++) KKT_col_touched[col] = 0;
+
+      // Reset solver information
+      reset_info(solver->info);
+
+  #ifdef OSQP_ENABLE_PROFILING
+      solver->info->update_time += osqp_toc(work->timer);
+  #endif
+
+  return 0;
 }
+
 
 
 OSQPInt osqp_update_rho(OSQPSolver* solver,
