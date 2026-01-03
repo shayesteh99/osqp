@@ -1340,14 +1340,9 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
-  printf("1343\n");
-  fflush(stdout);
 
   nnzP = OSQPMatrix_get_nz(work->data->P);
   nnzA = OSQPMatrix_get_nz(work->data->A);
-
-  printf("1349\n");
-  fflush(stdout);
 
   // printf("osqp_update_data_mat\n");
   // fflush(stdout);
@@ -1387,16 +1382,10 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
     A_new_n = nnzA;
   }
 
-  printf("1390\n");
-  fflush(stdout);
-
   // printf("osqp_update_data_mat\n");
   // fflush(stdout);
 
   if (solver->settings->scaling) unscale_data(solver);
-
-  printf("1398\n");
-  fflush(stdout);
 
   if (Px_new){
     OSQPMatrix_update_values(work->data->P, Px_new, Px_new_idx, P_new_n);
@@ -1405,13 +1394,7 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
     OSQPMatrix_update_values(work->data->A, Ax_new, Ax_new_idx, A_new_n);
   }
 
-  printf("1408\n");
-  fflush(stdout);
-
   if (solver->settings->scaling) scale_data(solver);
-
-  printf("1413\n");
-  fflush(stdout);
 
   // Update linear system structure with new data.
   // If there is scaling, then a full update is needed.
@@ -1428,9 +1411,6 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
                   work->data->A, Ax_new_idx, A_new_n);
   }
 
-  printf("1431\n");
-  fflush(stdout);
-
   // c_eprint("osqp_update_data_mat\n");
   // return 1;
 
@@ -1443,6 +1423,9 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
 #ifdef OSQP_ENABLE_PROFILING
   solver->info->update_time += osqp_toc(work->timer);
 #endif /* ifdef OSQP_ENABLE_PROFILING */
+
+  printf("1427\n");
+  fflush(stdout);
 
   return exitflag;
 }
