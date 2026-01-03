@@ -475,6 +475,21 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
 
     OSQPInt pos_D_count = 0;
 
+    printf("KKT dimension n = %d\n", (int)s->KKT->n);
+    printf("P CSC dimension n = %d (for final PD check)\n", (int)P->csc->n);
+    printf("P update count P_new_n = %d\n", (int)P_new_n);
+    printf("A update count A_new_n = %d\n", (int)A_new_n);
+    fflush(stdout);
+
+    if (Ax_new_idx && A_new_n > 0) {
+        printf("Ax_new_idx values: ");
+        for (OSQPInt i = 0; i < A_new_n; i++) {
+            printf("%d ", (int)Ax_new_idx[i]);
+        }
+        printf("\n");
+    }
+    fflush(stdout);
+
     // Update KKT matrix with new P
     printf("updating KKT_P\n");fflush(stdout);
     update_KKT_P(s->KKT, P->csc, Px_new_idx, P_new_n, s->PtoKKT, s->sigma, 0);
@@ -483,22 +498,55 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
     printf("updating KKT_A\n");fflush(stdout);
     update_KKT_A(s->KKT, A->csc, Ax_new_idx, A_new_n, s->AtoKKT);
 
+    printf("KKT matrix pointer after updates: %p\n", (void*)s->KKT);
+    fflush(stdout);
+
+    printf("Touched columns: ");
+    OSQPInt touched = 0;
+    for (OSQPInt col = 0; col < s->KKT->n; col++) {
+        if (KKT_col_touched[col]) {
+            printf("%d ", (int)col);
+            touched++;
+        }
+    }
+    printf("(total %d columns)\n", (int)touched);
+    fflush(stdout);
+
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
 
     // printf("update_linsys_solver_matrices_qdldl\n");fflush(stdout); exit(1);
 
     for(OSQPInt col = 0; col < s->KKT->n; col++) {
         if (KKT_col_touched[col]) {
-            if (QDLDL_factor_partial(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
-        s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
-        s->etree, s->bwork, s->iwork, s->fwork, col) < 0) {
-                return 1;  // early abort if partial factor fails
+            printf("\n-- Factoring column %d --\n", (int)col);
+            printf("Diagonal before factor: D[%d] = %.6f\n", (int)col, s->D[col]);
+            fflush(stdout);
+
+            OSQPInt ret = QDLDL_factor_partial(
+                s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+                s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
+                s->etree, s->bwork, s->iwork, s->fwork, col
+            );
+
+            printf("Return code from partial factorization on col %d = %d\n", (int)col, (int)ret);
+            printf("Diagonal after factor: D[%d] = %.6f, Dinv[%d] = %.6f\n",
+                   (int)col, s->D[col], (int)col, s->Dinv[col]);
+            fflush(stdout);
+
+            if (ret < 0) {
+                printf("Partial factorization FAILED on column %d, aborting.\n", (int)col);
+                fflush(stdout);
+                return 1;
             }
         }
         // Count positive diagonal
         if (s->D[col] > 0.0) {
             pos_D_count++;
         }
+
+        printf("\nPositive diagonals in D: %d\n", (int)pos_D_count);
+        printf("Resetting KKT_col_touched array\n");
+        fflush(stdout);
 
     }
 
