@@ -476,9 +476,11 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
     OSQPInt pos_D_count = 0;
 
     // Update KKT matrix with new P
+    printf("updating KKT_P\n");fflush(stdout);
     update_KKT_P(s->KKT, P->csc, Px_new_idx, P_new_n, s->PtoKKT, s->sigma, 0);
 
     // Update KKT matrix with new A
+    printf("updating KKT_A\n");fflush(stdout);
     update_KKT_A(s->KKT, A->csc, Ax_new_idx, A_new_n, s->AtoKKT);
 
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
