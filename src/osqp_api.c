@@ -1424,9 +1424,6 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   solver->info->update_time += osqp_toc(work->timer);
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
-  printf("1427\n");
-  fflush(stdout);
-
   return exitflag;
 }
 

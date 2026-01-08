@@ -525,6 +525,11 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
 
     // printf("update_linsys_solver_matrices_qdldl\n");fflush(stdout); exit(1);
 
+    printf("Initial D vector before any factorization:\n");
+    for(int i = 0; i < s->KKT->n; i++)
+        printf("D[%d] = %.6f\n", i, s->D[i]);
+    fflush(stdout);
+
     for(OSQPInt col = 0; col < s->KKT->n; col++) {
         if (KKT_col_touched[col]) {
             printf("\n-- Factoring column %d --\n", (int)col);
@@ -541,6 +546,11 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
             printf("Diagonal after factor: D[%d] = %.6f, Dinv[%d] = %.6f\n",
                    (int)col, s->D[col], (int)col, s->Dinv[col]);
             fflush(stdout);
+
+            if (fabs(s->D[col]) < 1e-6) {
+                printf("⚠️  Warning: very small pivot at D[%d] = %.6f\n", col, s->D[col]);
+                fflush(stdout);
+            }
 
             if (ret < 0) {
                 printf("Partial factorization FAILED on column %d, aborting.\n", (int)col);
