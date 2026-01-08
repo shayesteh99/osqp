@@ -1328,6 +1328,10 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   printf("osqp_update_data_mat\n");
   fflush(stdout);
 
+  printf("A_new_n = %d\n", A_new_n);
+  printf("Ax_new_idx pointer = %p\n", (void*)Ax_new_idx);
+  fflush(stdout);
+
   // Check if workspace has been initialized
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
@@ -1344,8 +1348,8 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   nnzP = OSQPMatrix_get_nz(work->data->P);
   nnzA = OSQPMatrix_get_nz(work->data->A);
 
-  // printf("osqp_update_data_mat\n");
-  // fflush(stdout);
+  printf("nnzP = %d\n", (int)nnzP);
+  printf("nnzA = %d\n", (int)nnzA);
 
   // Check if the number of elements to update is valid
   if (P_new_n > nnzP || P_new_n < 0) {
@@ -1399,6 +1403,7 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   // Update linear system structure with new data.
   // If there is scaling, then a full update is needed.
   if(solver->settings->scaling){
+
     exitflag = work->linsys_solver->update_matrices(
                   work->linsys_solver,
                   work->data->P, OSQP_NULL, nnzP,

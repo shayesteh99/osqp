@@ -484,10 +484,6 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
     // Update KKT matrix with new P
     printf("updating KKT_P\n");fflush(stdout);
 
-    printf("Pointer Px_new_idx = %p\n", (void*)Px_new_idx);
-    printf("Pointer Ax_new_idx = %p\n", (void*)Ax_new_idx);
-    fflush(stdout);
-
 
     printf("P indices updated: ");
     for(int i = 0; i < P_new_n; i++) printf("%d ", Px_new_idx[i]);
