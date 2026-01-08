@@ -1378,8 +1378,8 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
 
   if(Ax_new_idx == OSQP_NULL){
     printf("Ax_new_idx is null");
-    return 2;
   }
+  
   //indexing is required if the whole A is not updated
   if(Ax_new_idx == OSQP_NULL && A_new_n != 0 && A_new_n != nnzA){
     c_eprint("index vector is required for partial updates of A");

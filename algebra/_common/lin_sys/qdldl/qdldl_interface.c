@@ -489,10 +489,6 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
     for(int i = 0; i < P_new_n; i++) printf("%d ", Px_new_idx[i]);
     printf("\n");
 
-    printf("A indices updated: ");
-    for(int i = 0; i < A_new_n; i++) printf("%d ", Ax_new_idx[i]);
-    printf("\n");
-    fflush(stdout);
     update_KKT_P(s->KKT, P->csc, Px_new_idx, P_new_n, s->PtoKKT, s->sigma, 0);
 
     // Update KKT matrix with new A
