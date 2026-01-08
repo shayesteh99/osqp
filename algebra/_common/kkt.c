@@ -408,9 +408,12 @@ void update_KKT_A(OSQPCscMatrix* KKT,
   OSQPInt j, Aidx, Kidx, doall;
 
   if(A_new_n <= 0){
-    printf("didn't update A");
+    printf("didn't update A\n");
     fflush(stdout);
     return;}
+
+  printf("Is updating A\n");
+  fflush(stdout);
 
   //if Ax_new_idx is null, we assume that all
   //elements are to be replaced (and that A_new_n = nnz(A))
